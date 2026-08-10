@@ -1,0 +1,21 @@
+{
+  "Long": ["Long", "java.lang.Long"],
+  "Integer": ["Integer", "java.lang.Integer"],
+  "int": ["int", "int"],
+  "String": ["String", "java.lang.String"],
+  "Boolean": ["Boolean", "java.lang.Boolean"],
+  "boolean": ["boolean", "boolean"],
+  "Date": ["Date", "java.util.Date"],
+  "LocalDateTime": ["LocalDateTime", "java.time.LocalDateTime"],
+  "LocalDate": ["LocalDate", "java.time.LocalDate"],
+  "BigDecimal": ["BigDecimal", "java.math.BigDecimal"],
+  "Double": ["Double", "java.lang.Double"],
+  "double": ["double", "double"],
+  "Float": ["Float", "java.lang.Float"],
+  "float": ["float", "float"],
+  "Object": ["Object", "java.lang.Object"],
+  "Byte": ["Byte", "java.lang.Byte"],
+  "byte": ["byte", "byte"],
+  "Short": ["Short", "java.lang.Short"],
+  "short": ["short", "short"]
+}

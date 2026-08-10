@@ -1,0 +1,65 @@
+{# 设置回调 #}
+$!callback.setFileName($tool.append($tableInfo.name, "Service.java"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/service"))
+
+{# 拿到主键 #}
+{% if tableInfo.pkColumn | length > 0 %}
+    {% set pk = tableInfo.pkColumn[0] %}
+{% endif %}
+
+{% if tableInfo.savePackageName %}package {{ tableInfo.savePackageName }}.{% endif %}service;
+
+import {{ tableInfo.savePackageName }}.entity.{{ tableInfo.name }};
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+
+/**
+ * {{ tableInfo.comment }}({{ tableInfo.name }})表服务接口
+ *
+ * @author {{ author }}
+ * @since {{ currentTime }}
+ */
+public interface {{ tableInfo.name }}Service {
+
+    /**
+     * 通过ID查询单条数据
+     *
+     * @param {{ pk.name }} 主键
+     * @return 实例对象
+     */
+    {{ tableInfo.name }} queryById({{ pk.shortType }} {{ pk.name }});
+
+    /**
+     * 分页查询
+     *
+     * @param {{ tableInfo.nameLowerFirst }} 筛选条件
+     * @param pageRequest      分页对象
+     * @return 查询结果
+     */
+    Page<{{ tableInfo.name }}> queryByPage({{ tableInfo.name }} {{ tableInfo.nameLowerFirst }}, PageRequest pageRequest);
+
+    /**
+     * 新增数据
+     *
+     * @param {{ tableInfo.nameLowerFirst }} 实例对象
+     * @return 实例对象
+     */
+    {{ tableInfo.name }} insert({{ tableInfo.name }} {{ tableInfo.nameLowerFirst }});
+
+    /**
+     * 修改数据
+     *
+     * @param {{ tableInfo.nameLowerFirst }} 实例对象
+     * @return 实例对象
+     */
+    {{ tableInfo.name }} update({{ tableInfo.name }} {{ tableInfo.nameLowerFirst }});
+
+    /**
+     * 通过主键删除数据
+     *
+     * @param {{ pk.name }} 主键
+     * @return 是否成功
+     */
+    boolean deleteById({{ pk.shortType }} {{ pk.name }});
+
+}

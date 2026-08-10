@@ -1,0 +1,74 @@
+{
+  "tableName": "User",
+  "tableComment": "用户表",
+  "originalTableName": "sys_user",
+  "packageName": "com.example.demo",
+  "modulePath": "",
+  "author": "developer",
+  "columns": [
+    {
+      "name": "id",
+      "comment": "主键ID",
+      "type": "Long",
+      "originalName": "id",
+      "jdbcType": "BIGINT",
+      "isPrimaryKey": true
+    },
+    {
+      "name": "userName",
+      "comment": "用户名",
+      "type": "String",
+      "originalName": "user_name",
+      "jdbcType": "VARCHAR",
+      "isPrimaryKey": false
+    },
+    {
+      "name": "password",
+      "comment": "密码",
+      "type": "String",
+      "originalName": "password",
+      "jdbcType": "VARCHAR",
+      "isPrimaryKey": false
+    },
+    {
+      "name": "email",
+      "comment": "邮箱",
+      "type": "String",
+      "originalName": "email",
+      "jdbcType": "VARCHAR",
+      "isPrimaryKey": false
+    },
+    {
+      "name": "age",
+      "comment": "年龄",
+      "type": "Integer",
+      "originalName": "age",
+      "jdbcType": "INTEGER",
+      "isPrimaryKey": false
+    },
+    {
+      "name": "status",
+      "comment": "状态 0-禁用 1-启用",
+      "type": "Integer",
+      "originalName": "status",
+      "jdbcType": "INTEGER",
+      "isPrimaryKey": false
+    },
+    {
+      "name": "createTime",
+      "comment": "创建时间",
+      "type": "Date",
+      "originalName": "create_time",
+      "jdbcType": "TIMESTAMP",
+      "isPrimaryKey": false
+    },
+    {
+      "name": "updateTime",
+      "comment": "更新时间",
+      "type": "Date",
+      "originalName": "update_time",
+      "jdbcType": "TIMESTAMP",
+      "isPrimaryKey": false
+    }
+  ]
+}

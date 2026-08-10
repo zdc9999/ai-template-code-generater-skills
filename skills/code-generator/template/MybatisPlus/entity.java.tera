@@ -1,0 +1,36 @@
+{# 保存文件（宏定义） #}
+#save("/entity", ".java")
+
+{# 包路径（宏定义） #}
+#setPackageSuffix("entity")
+
+import com.baomidou.mybatisplus.extension.activerecord.Model;
+import java.io.Serializable;
+
+{# 表注释（宏定义） #}
+#tableComment("表实体类")
+@SuppressWarnings("serial")
+public class {{ tableInfo.name }} extends Model<{{ tableInfo.name }}> {
+{% for column in tableInfo.fullColumn %}
+    {% if column.comment %}/*{{ column.comment }}*/{% endif %}
+
+    private {{ column.shortType }} {{ column.name }};
+{% endfor %}
+
+{% for column in tableInfo.fullColumn %}
+#getSetMethod($column)
+{% endfor %}
+
+{% for column in tableInfo.pkColumn %}
+    /**
+     * 获取主键值
+     *
+     * @return 主键值
+     */
+    @Override
+    protected Serializable pkVal() {
+        return this.{{ column.name }};
+    }
+    {% break %}
+{% endfor %}
+}
