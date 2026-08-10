@@ -3,9 +3,15 @@
 基于 Tera 模板引擎的 AI 驱动代码生成工具链，包含两个核心 Skill：
 
 | Skill | 用途 | 方向 | 详细文档 |
-|-------|------|------|----------|
+| --- | --- | --- | --- |
 | **code-generator** | 基于模板生成代码 | 模板 → 代码 | [SKILL.md](skills/code-generator/SKILL.md) |
 | **template-generator** | 从现有项目提炼模板 | 代码 → 模板 | [SKILL.md](skills/template-generator/SKILL.md) |
+
+* * *
+
+ [![Gitee Stars](https://gitee.com/pretend-work/ai-template-code-generater-skills/badge/star.svg?theme=dark)](https://gitee.com/pretend-work/ai-template-code-generater-skills)[![Gitee Forks](https://gitee.com/pretend-work/ai-template-code-generater-skills/badge/fork.svg?theme=dark)](https://gitee.com/pretend-work/ai-template-code-generater-skills)
+
+> 🚀 **如果这个项目对你有帮助，请在 [Gitee](https://gitee.com/pretend-work/ai-template-code-generater-skills) 上给个 Star ⭐，让更多人看到！** 你的支持是我们持续改进的动力！
 
 ## 工作流程
 
@@ -17,7 +23,7 @@
         数据模型 JSON ──[code-generator 生成]──────▶ 新项目代码
 ```
 
----
+* * *
 
 # code-generator
 
@@ -27,7 +33,7 @@
 
 ## 快速开始
 
-### 1. 准备数据模型
+### 1\. 准备数据模型
 
 ```json
 {
@@ -43,7 +49,7 @@
 }
 ```
 
-### 2. 运行生成
+### 2\. 运行生成
 
 ```bash
 # 列出可用模板组
@@ -56,15 +62,16 @@
 ./scripts/easyframe-codegen --group Default --data user-model.json --output ./output
 ```
 
-### 3. 在 AI 对话中使用
+### 3\. 在 AI 对话中使用
 
 直接提出需求，AI 会自动调用 Skill：
-- "根据 user-model.json 生成代码，保存到 d:\my-project"
+
+-   "根据 user-model.json 生成代码，保存到 d:\\my-project"
 
 ## 命令行参数
 
 | 参数 | 简写 | 说明 |
-|------|------|------|
+| --- | --- | --- |
 | `--list-groups` | — | 列出所有可用模板组 |
 | `--group` | `-g` | 模板组名称（`Default` / `MybatisPlus`） |
 | `--data` | `-d` | 数据模型 JSON 文件路径 |
@@ -75,24 +82,24 @@
 ## 内置模板组
 
 | 模板组 | 技术栈 | 生成文件 |
-|--------|--------|----------|
+| --- | --- | --- |
 | `Default` | Spring Boot + MyBatis | Entity、Dao、Mapper XML、Service、ServiceImpl、Controller |
 | `MybatisPlus` | Spring Boot + MyBatis-Plus | Entity、Dao、Service、ServiceImpl、Controller |
 
 ## AI 交互流程
 
-1. **列出模板组 + 收集选择**：选择模板组和输出目录
-2. **确认数据模型**：有现成 JSON 则复用，否则逐字段收集
-3. **执行生成**：运行二进制生成代码
-4. **验证输出**：列出文件清单，抽查关键文件
+1.  **列出模板组 + 收集选择**：选择模板组和输出目录
+2.  **确认数据模型**：有现成 JSON 则复用，否则逐字段收集
+3.  **执行生成**：运行二进制生成代码
+4.  **验证输出**：列出文件清单，抽查关键文件
 
 ## 添加新模板组
 
-1. 在 `template/` 下创建新目录，放入 `.tera` 模板文件
-2. （可选）创建 `type-mapping.json` 定义专属类型映射
-3. 运行 `--list-groups` 验证
+1.  在 `template/` 下创建新目录，放入 `.tera` 模板文件
+2.  （可选）创建 `type-mapping.json` 定义专属类型映射
+3.  运行 `--list-groups` 验证
 
----
+* * *
 
 # template-generator
 
@@ -105,7 +112,7 @@
 **参数化替换**：将项目中具体的类名、字段名、包名替换为模板变量和 EasyFrame 宏。
 
 | 层级 | 示例 |
-|------|------|
+| --- | --- |
 | 表级参数 | `{{ tableInfo.name }}`、`{{ tableInfo.comment }}` |
 | 列级参数 | `{{ column.name }}`、`{{ column.shortType }}` |
 | 全局参数 | `${basePackage}`、`${commonImports}` |
@@ -113,20 +120,20 @@
 ## 支持的技术栈
 
 | 技术栈 | 可提炼的模板 |
-|--------|-------------|
+| --- | --- |
 | **Java/Spring Boot** | entity、controller、service、serviceImpl、dao、mapper.xml、type-mapping.json |
 | **Vue2** | page.vue、component.vue、api.js、store.js、router.js |
 | **Vue3** | page.vue3、component.vue、api.ts、store.ts、router.ts |
 
 ## AI 交互流程
 
-1. **确认提炼目标**：选择技术栈、源项目路径、目标模板组名称
-2. **扫描源项目**：扫描项目结构，识别可提炼的模板文件
-3. **选择生成模板**（人机交互）：
-   - 常规文件（多选）：entity、controller、page.vue 等
-   - 类型配置文件（单选）：是否生成 type-mapping.json
-4. **逐文件提炼**：参数化替换，生成 `.tera` 文件
-5. **验证模板**：`--list-groups` 确认可识别，`--dry-run` 预览结果
+1.  **确认提炼目标**：选择技术栈、源项目路径、目标模板组名称
+2.  **扫描源项目**：扫描项目结构，识别可提炼的模板文件
+3.  **选择生成模板**（人机交互）：
+    -   常规文件（多选）：entity、controller、page.vue 等
+    -   类型配置文件（单选）：是否生成 type-mapping.json
+4.  **逐文件提炼**：参数化替换，生成 `.tera` 文件
+5.  **验证模板**：`--list-groups` 确认可识别，`--dry-run` 预览结果
 
 ## 提炼示例
 
@@ -154,7 +161,17 @@ public class {{ tableInfo.name }} implements Serializable {
 }
 ```
 
----
+* * *
+
+## 👨‍💻 作者
+
+| 作者 | 联系微信 | 联系方式 |
+| --- | --- | --- |
+| **city-space** | zgr-zhonguo | [121051390@qq.com](mailto:121051390@qq.com) |
+
+> 💡 欢迎提交 Issue 和 PR，一起完善这个工具链！如果你有好的模板组，也欢迎贡献到项目中。
+
+* * *
 
 # 目录结构
 
