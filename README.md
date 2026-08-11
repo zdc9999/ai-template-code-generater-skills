@@ -171,6 +171,12 @@ public class {{ tableInfo.name }} implements Serializable {
 
 > 💡 欢迎提交 Issue 和 PR，一起完善这个工具链！如果你有好的模板组，也欢迎贡献到项目中。
 
+## 📱 交流群
+
+| 个人微信 | QQ群 |
+| --- | --- |
+| ![个人微信](share/weixingeren.jpg) | ![QQ群](share/qqqun.jpg) |
+
 * * *
 
 # 目录结构
