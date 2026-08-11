@@ -1,0 +1,38 @@
+$!callback.setFileName($tool.append($tableInfo.name, "Mapper.java"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/mapper"))
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.ibatis.annotations.Param;
+{% if tableInfo.savePackageName %}
+import {{ tableInfo.savePackageName }}.entity.{{ tableInfo.name }};
+{% endif %}
+
+import java.util.List;
+
+/**
+ * @Description: {{ tableInfo.comment }}Mapper接口
+ * @Author: {{ author }}
+ * @Date: {{ currentTime }}
+ */
+public interface {{ tableInfo.name }}Mapper extends BaseMapper<{{ tableInfo.name }}> {
+
+    /**
+     * 分页查询
+     *
+     * @param page      分页参数
+     * @param queryWrapper 查询条件
+     * @return
+     */
+    IPage<{{ tableInfo.name }}> queryPage(Page<{{ tableInfo.name }}> page, @Param("ew") Object queryWrapper);
+
+    /**
+     * 根据条件查询列表
+     *
+     * @param {{ tableInfo.nameLowerFirst }} 查询条件
+     * @return
+     */
+    List<{{ tableInfo.name }}> queryList(@Param("entity") {{ tableInfo.name }} {{ tableInfo.nameLowerFirst }});
+
+}

@@ -1,0 +1,19 @@
+{
+  "String": ["String", "java.lang.String"],
+  "Integer": ["Integer", "java.lang.Integer", "int"],
+  "Long": ["Long", "java.lang.Long", "long"],
+  "Double": ["Double", "java.lang.Double", "double"],
+  "Float": ["Float", "java.lang.Float", "float"],
+  "Short": ["Short", "java.lang.Short", "short"],
+  "Byte": ["Byte", "java.lang.Byte", "byte"],
+  "Boolean": ["Boolean", "java.lang.Boolean", "boolean"],
+  "BigDecimal": ["BigDecimal", "java.math.BigDecimal"],
+  "Date": ["Date", "java.util.Date"],
+  "LocalDateTime": ["LocalDateTime", "java.time.LocalDateTime"],
+  "LocalDate": ["LocalDate", "java.time.LocalDate"],
+  "LocalTime": ["LocalTime", "java.time.LocalTime"],
+  "Timestamp": ["Timestamp", "java.sql.Timestamp"],
+  "byte[]": ["byte[]", "[B"],
+  "Blob": ["Blob", "java.sql.Blob"],
+  "Clob": ["Clob", "java.sql.Clob"]
+}

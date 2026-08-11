@@ -1,0 +1,43 @@
+#save("/entity", ".java")
+#setPackageSuffix("entity")
+
+import java.io.Serializable;
+import java.util.Date;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.v3.oas.annotations.media.Schema;
+import org.jeecgframework.poi.excel.annotation.Excel;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
+
+#tableComment("实体类")
+@Data
+@EqualsAndHashCode(callSuper = false)
+@Accessors(chain = true)
+@Schema(description="{{ tableInfo.comment }}")
+@TableName("{{ tableInfo.obj.name }}")
+public class {{ tableInfo.name }} implements Serializable {
+    private static final long serialVersionUID = {{ serialUID }};
+
+{% for column in tableInfo.fullColumn %}
+{% if column.comment %}
+    /**
+     * {{ column.comment }}
+     */
+{% endif %}
+{% if column.name == "id" %}
+    @TableId(type = IdType.ASSIGN_ID)
+{% endif %}
+    @Schema(description = "{{ column.comment }}")
+    @Excel(name = "{{ column.comment }}", width = 15)
+    private {{ column.shortType }} {{ column.name }};
+
+{% endfor %}
+}

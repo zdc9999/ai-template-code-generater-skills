@@ -1,0 +1,68 @@
+$!callback.setFileName($tool.append("I", $tableInfo.name, "Service.java"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/service"))
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
+{% if tableInfo.savePackageName %}
+import {{ tableInfo.savePackageName }}.entity.{{ tableInfo.name }};
+{% endif %}
+
+import java.util.List;
+
+/**
+ * @Description: {{ tableInfo.comment }}服务接口
+ * @Author: {{ author }}
+ * @Date: {{ currentTime }}
+ */
+public interface I{{ tableInfo.name }}Service extends IService<{{ tableInfo.name }}> {
+
+    /**
+     * 分页查询
+     *
+     * @param page  分页参数
+     * @param {{ tableInfo.nameLowerFirst }} 查询条件
+     * @return
+     */
+    IPage<{{ tableInfo.name }}> queryPage(Page<{{ tableInfo.name }}> page, {{ tableInfo.name }} {{ tableInfo.nameLowerFirst }});
+
+    /**
+     * 根据ID查询
+     *
+     * @param id
+     * @return
+     */
+    {{ tableInfo.name }} getById(String id);
+
+    /**
+     * 保存
+     *
+     * @param {{ tableInfo.nameLowerFirst }}
+     * @return
+     */
+    boolean saveOne({{ tableInfo.name }} {{ tableInfo.nameLowerFirst }});
+
+    /**
+     * 更新
+     *
+     * @param {{ tableInfo.nameLowerFirst }}
+     * @return
+     */
+    boolean updateOne({{ tableInfo.name }} {{ tableInfo.nameLowerFirst }});
+
+    /**
+     * 根据ID删除
+     *
+     * @param id
+     * @return
+     */
+    boolean deleteById(String id);
+
+    /**
+     * 批量删除
+     *
+     * @param ids
+     * @return
+     */
+    boolean deleteBatch(List<String> ids);
+}
