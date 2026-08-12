@@ -1,0 +1,70 @@
+$!callback.setFileName($tool.append($tableInfo.nameLowerFirst, ".ts"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/store/modules"))
+import type { ErrorMessageMode } from '/#/axios';
+import { defineStore } from 'pinia';
+import { store } from '/@/store';
+import { getAuthCache, setAuthCache } from '/@/utils/auth';
+import { useMessage } from '/@/hooks/web/useMessage';
+import { router } from '/@/router';
+
+interface {{ tableInfo.name }}State {
+  {{ tableInfo.nameLowerFirst }}Info: Nullable<Recordable>;
+  {{ tableInfo.nameLowerFirst }}List: Recordable[];
+  lastUpdateTime: number;
+}
+
+export const use{{ tableInfo.name }}Store = defineStore({
+  id: 'app-{{ tableInfo.nameLowerFirst }}',
+  state: (): {{ tableInfo.name }}State => ({
+    // {{ tableInfo.comment }}信息
+    {{ tableInfo.nameLowerFirst }}Info: null,
+    // {{ tableInfo.comment }}列表
+    {{ tableInfo.nameLowerFirst }}List: [],
+    // 最后更新时间
+    lastUpdateTime: 0,
+  }),
+  getters: {
+    get{{ tableInfo.name }}Info(): Recordable {
+      return this.{{ tableInfo.nameLowerFirst }}Info || {};
+    },
+    get{{ tableInfo.name }}List(): Recordable[] {
+      return this.{{ tableInfo.nameLowerFirst }}List;
+    },
+    getLastUpdateTime(): number {
+      return this.lastUpdateTime;
+    },
+  },
+  actions: {
+    set{{ tableInfo.name }}Info(info: Recordable | null) {
+      this.{{ tableInfo.nameLowerFirst }}Info = info;
+      this.lastUpdateTime = new Date().getTime();
+    },
+    set{{ tableInfo.name }}List(list: Recordable[]) {
+      this.{{ tableInfo.nameLowerFirst }}List = list;
+      this.lastUpdateTime = new Date().getTime();
+    },
+    resetState() {
+      this.{{ tableInfo.nameLowerFirst }}Info = null;
+      this.{{ tableInfo.nameLowerFirst }}List = [];
+    },
+    /**
+     * 确认操作
+     */
+    confirmAction() {
+      const { createConfirm } = useMessage();
+      createConfirm({
+        iconType: 'warning',
+        title: '提示',
+        content: '是否确认此操作？',
+        onOk: async () => {
+          // 执行确认操作
+        },
+      });
+    },
+  },
+});
+
+// 在 setup 外部使用
+export function use{{ tableInfo.name }}StoreWithOut() {
+  return use{{ tableInfo.name }}Store(store);
+}

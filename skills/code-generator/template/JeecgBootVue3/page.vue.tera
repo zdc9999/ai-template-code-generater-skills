@@ -1,0 +1,172 @@
+$!callback.setFileName($tool.append($tableInfo.name, ".vue"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/views"))
+<template>
+  <div>
+    <!--引用表格-->
+    <BasicTable @register="registerTable" :rowSelection="rowSelection">
+      <!--插槽:table标题-->
+      <template #tableTitle>
+        <a-button type="primary" preIcon="ant-design:plus-outlined" @click="handleCreate"> 新增</a-button>
+        <a-button type="primary" preIcon="ant-design:export-outlined" @click="onExportXls"> 导出</a-button>
+        <j-upload-button type="primary" preIcon="ant-design:import-outlined" @click="onImportXls">导入</j-upload-button>
+        <a-dropdown v-if="selectedRowKeys.length > 0">
+          <template #overlay>
+            <a-menu>
+              <a-menu-item key="1" @click="batchHandleDelete">
+                <Icon icon="ant-design:delete-outlined"></Icon>
+                删除
+              </a-menu-item>
+            </a-menu>
+          </template>
+          <a-button>
+            批量操作
+            <Icon icon="mdi:chevron-down"></Icon>
+          </a-button>
+        </a-dropdown>
+      </template>
+      <!--操作栏-->
+      <template #action="{ record }">
+        <TableAction :actions="getTableAction(record)" :dropDownActions="getDropDownAction(record)" />
+      </template>
+    </BasicTable>
+    <!--表单抽屉-->
+    <{{ tableInfo.name }}Drawer @register="registerDrawer" @success="handleSuccess" />
+  </div>
+</template>
+
+<script lang="ts" name="{{ tableInfo.nameLowerFirst }}" setup>
+  //ts语法
+  import { ref, computed, unref } from 'vue';
+  import { BasicTable, TableAction, ActionItem } from '/@/components/Table';
+  import {{ tableInfo.name }}Drawer from './{{ tableInfo.name }}Drawer.vue';
+  import { useDrawer } from '/@/components/Drawer';
+  import { useListPage } from '/@/hooks/system/useListPage';
+  import { useMessage } from '/@/hooks/web/useMessage';
+  import { columns, searchFormSchema } from './{{ tableInfo.nameLowerFirst }}.data';
+  import { list, delete{{ tableInfo.name }}, batchDelete{{ tableInfo.name }}, getImportUrl, getExportUrl } from './{{ tableInfo.nameLowerFirst }}.api';
+  import { usePermission } from "/@/hooks/web/usePermission";
+
+  const { createMessage, createConfirm } = useMessage();
+  const { isDisabledAuth } = usePermission();
+  //注册drawer
+  const [registerDrawer, { openDrawer }] = useDrawer();
+
+  // 列表页面公共参数、方法
+  const { prefixCls, tableContext, onExportXls, onImportXls } = useListPage({
+    designScope: '{{ tableInfo.nameLowerFirst }}-list',
+    tableProps: {
+      title: '{{ tableInfo.comment }}',
+      api: list,
+      columns: columns,
+      size: 'small',
+      formConfig: {
+        schemas: searchFormSchema,
+      },
+      actionColumn: {
+        width: 120,
+      },
+      beforeFetch: (params) => {
+        return Object.assign({ column: 'createTime', order: 'desc' }, params);
+      },
+    },
+    exportConfig: {
+      name: '{{ tableInfo.comment }}',
+      url: getExportUrl,
+    },
+    importConfig: {
+      url: getImportUrl,
+    },
+  });
+
+  //注册table数据
+  const [registerTable, { reload, updateTableDataRecord }, { rowSelection, selectedRows, selectedRowKeys }] = tableContext;
+
+  /**
+   * 新增事件
+   */
+  function handleCreate() {
+    openDrawer(true, {
+      isUpdate: false,
+      showFooter: true,
+    });
+  }
+
+  /**
+   * 编辑事件
+   */
+  async function handleEdit(record: Recordable) {
+    openDrawer(true, {
+      record,
+      isUpdate: true,
+      showFooter: true,
+    });
+  }
+
+  /**
+   * 详情
+   */
+  async function handleDetail(record: Recordable) {
+    openDrawer(true, {
+      record,
+      isUpdate: true,
+      showFooter: false,
+    });
+  }
+
+  /**
+   * 删除事件
+   */
+  async function handleDelete(record) {
+    await delete{{ tableInfo.name }}({ id: record.id }, reload);
+  }
+
+  /**
+   * 批量删除事件
+   */
+  async function batchHandleDelete() {
+    await batchDelete{{ tableInfo.name }}({ ids: selectedRowKeys.value }, () => {
+      selectedRowKeys.value = [];
+      reload();
+    });
+  }
+
+  /**
+   * 成功回调
+   */
+  function handleSuccess() {
+    reload();
+  }
+
+  /**
+   * 操作栏
+   */
+  function getTableAction(record): ActionItem[] {
+    return [
+      {
+        label: '编辑',
+        onClick: handleEdit.bind(null, record),
+      },
+    ];
+  }
+
+  /**
+   * 下拉操作栏
+   */
+  function getDropDownAction(record): ActionItem[] {
+    return [
+      {
+        label: '详情',
+        onClick: handleDetail.bind(null, record),
+      },
+      {
+        label: '删除',
+        popConfirm: {
+          title: '是否确认删除',
+          confirm: handleDelete.bind(null, record),
+        },
+      },
+    ];
+  }
+</script>
+
+<style scoped></style>

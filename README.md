@@ -85,6 +85,8 @@
 | --- | --- | --- |
 | `Default` | Spring Boot + MyBatis | Entity、Dao、Mapper XML、Service、ServiceImpl、Controller |
 | `MybatisPlus` | Spring Boot + MyBatis-Plus | Entity、Dao、Service、ServiceImpl、Controller |
+| `JeecgBoot` | JeecgBoot 后端 | Entity、Dao、Mapper XML、Service、ServiceImpl、Controller |
+| `JeecgBootVue3` | JeecgBoot Vue3 前端 | page.vue、component.vue、api.ts、store.ts、router.ts |
 
 ## AI 交互流程
 

@@ -1,0 +1,43 @@
+$!callback.setFileName($tool.append($tableInfo.nameLowerFirst, ".ts"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/router/routes/modules"))
+import type { AppRouteModule } from '/@/router/types';
+
+import { LAYOUT } from '/@/router/constant';
+import { t } from '/@/hooks/web/useI18n';
+
+const {{ tableInfo.nameLowerFirst }}: AppRouteModule = {
+  path: '/{{ tableInfo.nameLowerFirst }}',
+  name: '{{ tableInfo.name }}',
+  component: LAYOUT,
+  redirect: '/{{ tableInfo.nameLowerFirst }}/list',
+  meta: {
+    orderNo: 2000,
+    icon: 'ion:grid-outline',
+    title: t('routes.{{ tableInfo.nameLowerFirst }}.{{ tableInfo.nameLowerFirst }}'),
+  },
+  children: [
+    {
+      path: 'list',
+      name: '{{ tableInfo.name }}List',
+      meta: {
+        title: t('routes.{{ tableInfo.nameLowerFirst }}.{{ tableInfo.nameLowerFirst }}'),
+        ignoreKeepAlive: true,
+      },
+      component: () => import('/@/views/{{ tableInfo.nameLowerFirst }}/index.vue'),
+    },
+    {
+      path: '{{ tableInfo.nameLowerFirst }}_detail/:id',
+      name: '{{ tableInfo.name }}Detail',
+      meta: {
+        hideMenu: true,
+        title: t('routes.{{ tableInfo.nameLowerFirst }}.{{ tableInfo.nameLowerFirst }}_detail'),
+        ignoreKeepAlive: true,
+        showMenu: false,
+        currentActiveMenu: '/{{ tableInfo.nameLowerFirst }}/list',
+      },
+      component: () => import('/@/views/{{ tableInfo.nameLowerFirst }}/{{ tableInfo.name }}Detail.vue'),
+    },
+  ],
+};
+
+export default {{ tableInfo.nameLowerFirst }};

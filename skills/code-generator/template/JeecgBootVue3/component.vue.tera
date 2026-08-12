@@ -1,0 +1,87 @@
+$!callback.setFileName($tool.append($tableInfo.name, "Drawer.vue"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/views"))
+<template>
+  <BasicDrawer
+    v-bind="$attrs"
+    @register="registerDrawer"
+    :title="getTitle"
+    :width="adaptiveWidth"
+    @ok="handleSubmit"
+    :showFooter="showFooter"
+    destroyOnClose
+  >
+    <BasicForm @register="registerForm" />
+  </BasicDrawer>
+</template>
+<script lang="ts" setup>
+  import { ref, computed, unref } from 'vue';
+  import { BasicForm, useForm } from '/@/components/Form/index';
+  import { formSchema } from './{{ tableInfo.nameLowerFirst }}.data';
+  import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
+  import { saveOrUpdate{{ tableInfo.name }} } from './{{ tableInfo.nameLowerFirst }}.api';
+  import { useDrawerAdaptiveWidth } from '/@/hooks/jeecg/useAdaptiveWidth';
+
+  // 声明Emits
+  const emit = defineEmits(['success', 'register']);
+  const isUpdate = ref(true);
+  const rowId = ref('');
+
+  //表单配置
+  const [registerForm, { setProps, resetFields, setFieldsValue, validate, updateSchema }] = useForm({
+    labelWidth: 90,
+    schemas: formSchema,
+    showActionButtonGroup: false,
+  });
+
+  const showFooter = ref(true);
+
+  //表单赋值
+  const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
+    await resetFields();
+    showFooter.value = data?.showFooter ?? true;
+    setDrawerProps({ confirmLoading: false, showFooter: showFooter.value });
+    isUpdate.value = !!data?.isUpdate;
+
+    if (unref(isUpdate)) {
+      rowId.value = data.record.id;
+    }
+
+    // 设置表单值
+    if (typeof data.record === 'object') {
+      setFieldsValue({
+        ...data.record,
+      });
+    }
+
+    // 隐藏底部时禁用整个表单
+    setProps({ disabled: !showFooter.value });
+  });
+
+  //获取标题
+  const getTitle = computed(() => {
+    if (!unref(isUpdate)) {
+      return '新增{{ tableInfo.comment }}';
+    } else {
+      return unref(showFooter) ? '编辑{{ tableInfo.comment }}' : '{{ tableInfo.comment }}详情';
+    }
+  });
+
+  const { adaptiveWidth } = useDrawerAdaptiveWidth();
+
+  //提交事件
+  async function handleSubmit() {
+    try {
+      let values = await validate();
+      setDrawerProps({ confirmLoading: true });
+      let isUpdateVal = unref(isUpdate);
+      //提交表单
+      await saveOrUpdate{{ tableInfo.name }}(values, isUpdateVal);
+      //关闭弹窗
+      closeDrawer();
+      //刷新列表
+      emit('success', { isUpdateVal, values });
+    } finally {
+      setDrawerProps({ confirmLoading: false });
+    }
+  }
+</script>

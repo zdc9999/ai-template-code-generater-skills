@@ -1,0 +1,68 @@
+$!callback.setFileName($tool.append($tableInfo.nameLowerFirst, ".api.ts"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/views"))
+import { defHttp } from '/@/utils/http/axios';
+import { Modal } from 'ant-design-vue';
+
+enum Api {
+  list = '/sys/{{ tableInfo.nameLowerFirst }}/list',
+  save = '/sys/{{ tableInfo.nameLowerFirst }}/add',
+  edit = '/sys/{{ tableInfo.nameLowerFirst }}/edit',
+  delete = '/sys/{{ tableInfo.nameLowerFirst }}/delete',
+  deleteBatch = '/sys/{{ tableInfo.nameLowerFirst }}/deleteBatch',
+  importExcel = '/sys/{{ tableInfo.nameLowerFirst }}/importExcel',
+  exportXls = '/sys/{{ tableInfo.nameLowerFirst }}/exportXls',
+}
+
+/**
+ * 导出api
+ * @param params
+ */
+export const getExportUrl = Api.exportXls;
+
+/**
+ * 导入api
+ */
+export const getImportUrl = Api.importExcel;
+
+/**
+ * 列表接口
+ * @param params
+ */
+export const list = (params) => defHttp.get({ url: Api.list, params });
+
+/**
+ * 删除
+ * @param params
+ */
+export const delete{{ tableInfo.name }} = (params, handleSuccess) => {
+  return defHttp.delete({ url: Api.delete, params }, { joinParamsToUrl: true }).then(() => {
+    handleSuccess();
+  });
+};
+
+/**
+ * 批量删除
+ * @param params
+ */
+export const batchDelete{{ tableInfo.name }} = (params, handleSuccess) => {
+  Modal.confirm({
+    title: '确认删除',
+    content: '是否删除选中数据',
+    okText: '确认',
+    cancelText: '取消',
+    onOk: () => {
+      return defHttp.delete({ url: Api.deleteBatch, data: params }, { joinParamsToUrl: true }).then(() => {
+        handleSuccess();
+      });
+    },
+  });
+};
+
+/**
+ * 保存或者更新
+ * @param params
+ */
+export const saveOrUpdate{{ tableInfo.name }} = (params, isUpdate) => {
+  let url = isUpdate ? Api.edit : Api.save;
+  return defHttp.post({ url: url, params });
+};
