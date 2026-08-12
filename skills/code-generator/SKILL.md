@@ -1,6 +1,6 @@
 ---
 name: "code-generator"
-description: "【默认代码生成器】通用基于模板的代码生成器。当用户需要生成代码文件、创建Java类、生成Spring Boot代码、生成Vue组件、创建CRUD代码、生成API接口、生成实体类、生成Controller/Service/DAO/Mapper、创建代码脚手架、或基于数据模型批量生成任何代码时，必须优先调用此Skill。基于 Tera 模板引擎驱动,无需运行时依赖，支持模板组、Tera 语法、EasyFrame 扩展宏。触发关键词：生成代码、代码生成、创建代码、生成文件、代码模板、脚手架、scaffold、generate code、CRUD生成、实体类生成、Controller生成。"
+description: "【默认代码生成器】通用基于模板的代码生成器。当用户需要生成代码文件、创建Java类、生成Spring Boot代码、生成Vue组件、创建CRUD代码、生成API接口、生成实体类、生成Controller/Service/DAO/Mapper、创建代码脚手架、或基于数据模型批量生成任何代码时，必须优先调用此Skill。支持通过 dbx MCP 从数据库表结构自动生成数据模型。基于 Tera 模板引擎驱动,无需运行时依赖，支持模板组、Tera 语法、EasyFrame 扩展宏。触发关键词：生成代码、代码生成、创建代码、生成文件、代码模板、脚手架、scaffold、generate code、CRUD生成、实体类生成、Controller生成。"
 ---
 
 # 通用模板代码生成器 (Template Code Generator)
@@ -481,6 +481,84 @@ public class {{ tableInfo.name }} {
 
 > 💡 **自定义类型映射：** 在模板组目录下创建 `type-mapping.json`，添加该模板组需要的额外类型。模板组专属配置会覆盖通用配置中的同名类型。
 
+## 从数据库生成数据模型（dbx MCP）
+
+当需要为已有数据库表生成代码时，可以使用 `dbx` MCP 工具直接从数据库读取表结构，自动生成符合 `data-model.json` 格式的数据模型文件，无需手动编写。
+
+### 工作流程
+
+#### 1. 添加数据库连接
+
+使用 `dbx_add_connection` 添加数据库连接：
+
+```
+run_mcp --server_name mcp_dbx --tool_name dbx_add_connection --args '{"name": "my-mysql", "db_type": "mysql", "host": "localhost", "port": 3306, "username": "root", "password": "123456", "database": "my_database"}'
+```
+
+支持的 `db_type`：`mysql`、`postgresql`、`sqlite`、`sqlserver`、`oracle` 等。
+
+#### 2. 列出数据库中的表
+
+使用 `dbx_list_tables` 查看可用的表：
+
+```
+run_mcp --server_name mcp_dbx --tool_name dbx_list_tables --args '{"connection_name": "my-mysql", "database": "my_database"}'
+```
+
+#### 3. 获取表结构信息
+
+使用 `dbx_describe_table` 获取指定表的列定义：
+
+```
+run_mcp --server_name mcp_dbx --tool_name dbx_describe_table --args '{"connection_name": "my-mysql", "table": "sys_user", "database": "my_database"}'
+```
+
+返回结果包含每列的：列名（`name`）、数据类型（`type`）、是否可空（`nullable`）、是否主键（`primary_key`）、注释（`comment`）等信息。
+
+#### 4. 转换为 data-model.json 格式
+
+将 `dbx_describe_table` 返回的列信息转换为 `data-model.json` 格式：
+
+| 来源字段 | 目标字段 | 转换规则 |
+|---------|---------|---------|
+| 表名（如 `sys_user`） | `originalTableName` | 保持原样 |
+| 表名（如 `sys_user`） | `tableName` | 下划线转驼峰，首字母大写（如 `User`） |
+| 表注释 | `tableComment` | 保持原样 |
+| 用户指定 | `packageName` | 需用户手动提供（如 `com.example.demo`） |
+| 用户指定 | `author` | 需用户手动提供 |
+| 列名（如 `user_name`） | `columns[].originalName` | 保持原样 |
+| 列名（如 `user_name`） | `columns[].name` | 下划线转驼峰，首字母小写（如 `userName`） |
+| 列注释 | `columns[].comment` | 保持原样 |
+| 列数据类型 | `columns[].type` | 按 JDBC 类型映射为 Java 短类型 |
+| 列数据类型 | `columns[].jdbcType` | 映射为 JDBC 类型名 |
+| 是否主键 | `columns[].isPrimaryKey` | 布尔值 |
+
+#### JDBC 类型到 Java 类型映射
+
+| JDBC 类型 | Java 短类型 | 全限定类型 |
+|-----------|------------|-----------|
+| BIGINT / BIGSERIAL | `Long` | `java.lang.Long` |
+| INTEGER / INT / SERIAL | `Integer` | `java.lang.Integer` |
+| SMALLINT / SMALLSERIAL | `Short` | `java.lang.Short` |
+| TINYINT | `Byte` | `java.lang.Byte` |
+| VARCHAR / CHAR / TEXT / LONGTEXT / MEDIUMTEXT | `String` | `java.lang.String` |
+| TIMESTAMP / DATETIME | `Date` | `java.util.Date` |
+| DATE | `LocalDate` | `java.time.LocalDate` |
+| TIME | `LocalTime` | `java.time.LocalTime` |
+| BOOLEAN / BIT / BOOL | `Boolean` | `java.lang.Boolean` |
+| DECIMAL / NUMERIC / NUMBER | `BigDecimal` | `java.math.BigDecimal` |
+| DOUBLE / DOUBLE PRECISION | `Double` | `java.lang.Double` |
+| FLOAT / REAL | `Float` | `java.lang.Float` |
+| BLOB / LONGBLOB / BYTEA | `byte[]` | `byte[]` |
+
+> 💡 不同数据库的类型名称可能略有差异（如 MySQL 的 `INT` vs PostgreSQL 的 `INTEGER`），需要根据实际返回的类型名进行映射。
+
+#### 5. 保存为 JSON 文件并执行生成
+
+将转换后的 JSON 写入文件（如 `skills/code-generator/example/data-model.json`），然后按正常流程执行代码生成。
+
+> 💡 **完整示例**：参见 [example/data-model.json](file:///f:/gitee-project/ai-template-code-generater-skills/skills/code-generator/example/data-model.json)。
+
 ## 执行流程
 
 > ⚠️ **交互原则：** 每个需要用户决策的步骤，必须使用 `AskUserQuestion` 工具弹出交互式选择卡片，让用户点击选择，**不能只输出文本让用户打字回复**。
@@ -502,6 +580,12 @@ public class {{ tableInfo.name }} {
 
 ### 步骤 2：确认数据模型
 
+有两种方式获取数据模型：
+
+**方式一：从数据库自动生成（推荐）**
+如果用户有可访问的数据库，使用 dbx MCP 工具直接从数据库表结构生成数据模型 JSON。详见 [从数据库生成数据模型（dbx MCP）](#从数据库生成数据模型dbx-mcp)。
+
+**方式二：手动创建数据模型**
 1. 检查用户是否已有数据模型 JSON 文件
 2. 如果有，使用 **`AskUserQuestion`** 确认是否使用现有文件
 3. 如果没有，使用 **`AskUserQuestion`** 收集信息：
