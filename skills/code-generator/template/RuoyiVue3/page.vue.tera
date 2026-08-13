@@ -1,0 +1,122 @@
+$!callback.setFileName($tool.append($tableInfo.nameLowerFirst, "/index.vue"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/../../../views"))
+
+{# RuoyiVue3 模板组 - CRUD 列表页模板。全局变量：apiDir api 目录（如 info）、permissionPrefix 权限前缀（如 info），见 global-config.json #}
+{% if tableInfo.pkColumn | length > 0 %}
+{% set pk = tableInfo.pkColumn[0] %}
+{% endif %}
+<script setup lang="ts">
+import { onMounted, reactive, ref } from 'vue'
+import { Delete, Edit, Plus, Refresh, Search } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
+import Pagination from '@/components/Pagination/index.vue'
+import { create{{ tableInfo.name }}, delete{{ tableInfo.name }}, get{{ tableInfo.name }}, get{{ tableInfo.name }}Page, update{{ tableInfo.name }}, type {{ tableInfo.name }}PageQuery, type {{ tableInfo.name }}Record } from '@/api/${apiDir}/{{ tableInfo.nameLowerFirst }}'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
+const loading = ref(false)
+const formLoading = ref(false)
+const dialogVisible = ref(false)
+const editing = ref(false)
+const formRef = ref<FormInstance>()
+const rows = ref<{{ tableInfo.name }}Record[]>([])
+const total = ref(0)
+const query = reactive<{{ tableInfo.name }}PageQuery>({ pageNo: 1, pageSize: 10 })
+const form = reactive<{{ tableInfo.name }}Record>({})
+
+function can(permission: string) {
+  return userStore.roles.includes('super_admin') || userStore.permissions.includes('*:*:*') || userStore.permissions.includes(permission)
+}
+
+async function loadPage() {
+  loading.value = true
+  try {
+    const response = await get{{ tableInfo.name }}Page(query)
+    rows.value = response.data.list || []
+    total.value = response.data.total || 0
+  } finally {
+    loading.value = false
+  }
+}
+
+function resetQuery() {
+  Object.assign(query, { pageNo: 1, pageSize: 10 })
+  void loadPage()
+}
+
+function resetForm() {
+  Object.keys(form).forEach((key) => delete form[key as keyof {{ tableInfo.name }}Record])
+}
+
+async function openForm(id?: {{ tableInfo.name }}Record['id']) {
+  resetForm()
+  editing.value = Boolean(id)
+  dialogVisible.value = true
+  if (!id) return
+  formLoading.value = true
+  try {
+    const response = await get{{ tableInfo.name }}(id)
+    Object.assign(form, response.data)
+  } finally {
+    formLoading.value = false
+  }
+}
+
+async function submitForm() {
+  formLoading.value = true
+  try {
+    if (editing.value) await update{{ tableInfo.name }}({ ...form })
+    else await create{{ tableInfo.name }}({ ...form })
+    ElMessage.success(editing.value ? '{{ tableInfo.comment }}修改成功' : '{{ tableInfo.comment }}新增成功')
+    dialogVisible.value = false
+    await loadPage()
+  } finally {
+    formLoading.value = false
+  }
+}
+
+async function removeRow(row: {{ tableInfo.name }}Record) {
+  await ElMessageBox.confirm('确定删除{{ tableInfo.comment }}“' + (row.{{ pk.name }} || row.id) + '”吗？', '删除确认', { type: 'warning' })
+  await delete{{ tableInfo.name }}(row.id!)
+  ElMessage.success('{{ tableInfo.comment }}删除成功')
+  await loadPage()
+}
+
+onMounted(() => void loadPage())
+</script>
+
+<template><section class="business-page">
+  <div class="panel query-panel">
+    <el-form :model="query" inline @submit.prevent="query.pageNo = 1; loadPage()">
+{%- for column in tableInfo.otherColumn %}
+      <el-form-item label="{{ column.comment }}">{% if column.type == "java.lang.String" %}<el-input v-model="query.{{ column.name }}" clearable placeholder="请输入{{ column.comment }}" />{% elif column.type == "java.util.Date" or column.type == "java.time.LocalDateTime" or column.type == "java.time.LocalDate" or column.type == "java.time.LocalTime" %}<el-date-picker v-model="query.{{ column.name }}" type="date" value-format="YYYY-MM-DD" placeholder="请选择{{ column.comment }}" />{% elif column.type == "java.lang.Long" or column.type == "java.lang.Integer" or column.type == "java.lang.Short" or column.type == "java.lang.Byte" or column.type == "java.lang.Double" or column.type == "java.lang.Float" or column.type == "java.math.BigDecimal" or column.type == "int" or column.type == "double" or column.type == "float" or column.type == "short" or column.type == "byte" %}<el-input-number v-model="query.{{ column.name }}" controls-position="right" />{% elif column.type == "java.lang.Boolean" or column.type == "boolean" %}<el-select v-model="query.{{ column.name }}" clearable placeholder="全部"><el-option label="是" :value="true" /><el-option label="否" :value="false" /></el-select>{% endif %}</el-form-item>
+{%- endfor %}
+      <el-form-item><el-button type="primary" :icon="Search" @click="query.pageNo = 1; loadPage()">查询</el-button><el-button :icon="Refresh" @click="resetQuery">重置</el-button></el-form-item>
+    </el-form>
+    <div class="heading-actions"><el-button v-if="can('${permissionPrefix}:{{ tableInfo.nameLowerFirst }}:create')" type="primary" :icon="Plus" @click="openForm()">新增</el-button></div>
+  </div>
+  <div class="panel table-panel">
+    <el-table v-loading="loading" :data="rows" row-key="id">
+{%- for column in tableInfo.otherColumn %}
+      <el-table-column prop="{{ column.name }}" label="{{ column.comment }}" min-width="120" show-overflow-tooltip />
+{%- endfor %}
+      <el-table-column label="操作" width="150" fixed="right">
+        <template #default="scope">
+          <el-button v-if="can('${permissionPrefix}:{{ tableInfo.nameLowerFirst }}:update')" link type="primary" :icon="Edit" @click="openForm(scope.row.id)">修改</el-button>
+          <el-button v-if="can('${permissionPrefix}:{{ tableInfo.nameLowerFirst }}:delete')" link type="danger" :icon="Delete" @click="removeRow(scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
+      <template #empty><el-empty description="暂无{{ tableInfo.comment }}数据" /></template>
+    </el-table>
+    <Pagination v-model:page="query.pageNo" v-model:limit="query.pageSize" :total="total" @pagination="loadPage" />
+  </div>
+  <el-dialog v-model="dialogVisible" :title="editing ? '修改{{ tableInfo.comment }}' : '新增{{ tableInfo.comment }}'" width="620px">
+    <el-form ref="formRef" v-loading="formLoading" :model="form" label-width="100px">
+{%- for column in tableInfo.otherColumn %}
+      <el-form-item label="{{ column.comment }}" prop="{{ column.name }}">{% if column.type == "java.lang.String" %}<el-input v-model="form.{{ column.name }}" placeholder="请输入{{ column.comment }}" />{% elif column.type == "java.util.Date" or column.type == "java.time.LocalDateTime" or column.type == "java.time.LocalDate" or column.type == "java.time.LocalTime" %}<el-date-picker v-model="form.{{ column.name }}" type="date" value-format="YYYY-MM-DD" placeholder="请选择{{ column.comment }}" style="width:100%" />{% elif column.type == "java.lang.Long" or column.type == "java.lang.Integer" or column.type == "java.lang.Short" or column.type == "java.lang.Byte" or column.type == "java.lang.Double" or column.type == "java.lang.Float" or column.type == "java.math.BigDecimal" or column.type == "int" or column.type == "double" or column.type == "float" or column.type == "short" or column.type == "byte" %}<el-input-number v-model="form.{{ column.name }}" controls-position="right" style="width:100%" />{% elif column.type == "java.lang.Boolean" or column.type == "boolean" %}<el-radio-group v-model="form.{{ column.name }}"><el-radio :value="true">是</el-radio><el-radio :value="false">否</el-radio></el-radio-group>{% endif %}</el-form-item>
+{%- endfor %}
+    </el-form>
+    <template #footer><el-button @click="dialogVisible = false">取消</el-button><el-button type="primary" :loading="formLoading" @click="submitForm">确定</el-button></template>
+  </el-dialog>
+</section></template>
+<style scoped>.business-page{display:grid;gap:16px}.heading-actions{display:flex;justify-content:flex-end}.query-panel{padding:18px 18px 0}.table-panel{overflow:hidden}</style>

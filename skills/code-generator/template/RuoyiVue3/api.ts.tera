@@ -1,0 +1,28 @@
+$!callback.setFileName($tool.append($tableInfo.nameLowerFirst, ".ts"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/../../../api"))
+
+{# RuoyiVue3 模板组 - API 服务模板。全局变量：apiPrefix 接口前缀（如 /info）、apiDir api 目录（如 info），见 global-config.json #}
+import request, { requestRaw } from '@/utils/request'
+import type { ApiId, CommonResult, PageResult } from '@/types/api'
+
+export interface {{ tableInfo.name }}PageQuery {
+  pageNo: number
+  pageSize: number
+{%- for column in tableInfo.otherColumn %}
+  {{ column.name }}?: {% if column.type == "java.lang.Boolean" or column.type == "boolean" %}boolean{% elif column.type == "java.lang.Long" or column.type == "java.lang.Integer" or column.type == "java.lang.Short" or column.type == "java.lang.Byte" or column.type == "java.lang.Double" or column.type == "java.lang.Float" or column.type == "java.math.BigDecimal" or column.type == "int" or column.type == "double" or column.type == "float" or column.type == "short" or column.type == "byte" %}number{% else %}string{% endif %}
+{%- endfor %}
+}
+
+export interface {{ tableInfo.name }}Record {
+  id?: ApiId
+{%- for column in tableInfo.otherColumn %}
+  {{ column.name }}?: {% if column.type == "java.lang.Boolean" or column.type == "boolean" %}boolean{% elif column.type == "java.lang.Long" or column.type == "java.lang.Integer" or column.type == "java.lang.Short" or column.type == "java.lang.Byte" or column.type == "java.lang.Double" or column.type == "java.lang.Float" or column.type == "java.math.BigDecimal" or column.type == "int" or column.type == "double" or column.type == "float" or column.type == "short" or column.type == "byte" %}number{% else %}string{% endif %}
+{%- endfor %}
+}
+
+export const get{{ tableInfo.name }}Page = (params: {{ tableInfo.name }}PageQuery): Promise<CommonResult<PageResult<{{ tableInfo.name }}Record>>> => request<PageResult<{{ tableInfo.name }}Record>>({ url: '${apiPrefix}/{{ tableInfo.nameLowerFirst }}/page', method: 'get', params })
+export const get{{ tableInfo.name }} = (id: ApiId): Promise<CommonResult<{{ tableInfo.name }}Record>> => request<{{ tableInfo.name }}Record>({ url: '${apiPrefix}/{{ tableInfo.nameLowerFirst }}/get', method: 'get', params: { id } })
+export const create{{ tableInfo.name }} = (data: {{ tableInfo.name }}Record): Promise<CommonResult<ApiId>> => request<ApiId>({ url: '${apiPrefix}/{{ tableInfo.nameLowerFirst }}/create', method: 'post', data })
+export const update{{ tableInfo.name }} = (data: {{ tableInfo.name }}Record): Promise<CommonResult<boolean>> => request<boolean>({ url: '${apiPrefix}/{{ tableInfo.nameLowerFirst }}/update', method: 'put', data })
+export const delete{{ tableInfo.name }} = (id: ApiId): Promise<CommonResult<boolean>> => request<boolean>({ url: '${apiPrefix}/{{ tableInfo.nameLowerFirst }}/delete', method: 'delete', params: { id } })
+export const export{{ tableInfo.name }} = (params: Omit<{{ tableInfo.name }}PageQuery, 'pageNo' | 'pageSize'>): Promise<Blob> => requestRaw<Blob>({ url: '${apiPrefix}/{{ tableInfo.nameLowerFirst }}/export-excel', method: 'get', params, responseType: 'blob' })

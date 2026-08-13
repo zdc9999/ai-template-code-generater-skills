@@ -1,0 +1,23 @@
+$!callback.setFileName($tool.append($tableInfo.name, "TableColumn.vue"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/../../../views"))
+
+{# RuoyiVue3 模板组 - 递归表格列组件模板。使用时需在页面目录提供 schema.ts 定义 {{ tableInfo.name }}Column 类型（key/label/width/children/multiline 可选字段） #}
+<script setup lang="ts">
+import type { {{ tableInfo.name }}Column } from './schema'
+
+defineOptions({ name: '{{ tableInfo.name }}TableColumn' })
+defineProps<{ column: {{ tableInfo.name }}Column }>()
+</script>
+
+<template>
+  <el-table-column v-if="column.children" :label="column.label" align="center">
+    <{{ tableInfo.name }}TableColumn v-for="child in column.children" :key="child.key || child.label" :column="child" />
+  </el-table-column>
+  <el-table-column v-else :prop="column.key" :label="column.label" :width="column.width" align="center">
+    <template #default="scope"><span :class="{ multiline: column.multiline }">{% raw %}{{ scope.row?.[column.key || ''] ?? '' }}{% endraw %}</span></template>
+  </el-table-column>
+</template>
+
+<style scoped>
+.multiline{white-space:pre-line}
+</style>
