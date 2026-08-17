@@ -73,7 +73,7 @@
 | 参数 | 简写 | 说明 |
 | --- | --- | --- |
 | `--list-groups` | — | 列出所有可用模板组 |
-| `--group` | `-g` | 模板组名称（`Default` / `MybatisPlus`） |
+| `--group` | `-g` | 模板组名称（如 `Default` / `MybatisPlus` / `JeecgBoot` 等，详见 [内置模板组](#内置模板组)） |
 | `--data` | `-d` | 数据模型 JSON 文件路径 |
 | `--output` | `-o` | 输出根目录（默认 `./output`） |
 | `--global-config` | — | 全局变量配置 JSON 文件路径 |
@@ -83,10 +83,12 @@
 
 | 模板组 | 技术栈 | 生成文件 |
 | --- | --- | --- |
-| `Default` | Spring Boot + MyBatis | Entity、Dao、Mapper XML、Service、ServiceImpl、Controller |
+| `Default` | Spring Boot + MyBatis | Entity、Dao、Mapper XML、Service、ServiceImpl、Controller、Debug |
 | `MybatisPlus` | Spring Boot + MyBatis-Plus | Entity、Dao、Service、ServiceImpl、Controller |
 | `JeecgBoot` | JeecgBoot 后端 | Entity、Dao、Mapper XML、Service、ServiceImpl、Controller |
 | `JeecgBootVue3` | JeecgBoot Vue3 前端 | page.vue、component.vue、api.ts、store.ts、router.ts |
+| `JeeSite5` | JeeSite5 后端 | Entity、Dao、Mapper XML、Service(Direct)、Controller、Form HTML、List HTML |
+| `RuoyiVue3` | RuoYi Vue3 前端 | page.vue、component.vue、api.ts |
 
 ## AI 交互流程
 
@@ -184,18 +186,33 @@ public class {{ tableInfo.name }} implements Serializable {
 # 目录结构
 
 ```
-f:\code\ai-code-generater\
-├── readme.md
-├── .trae\skills\
-│   ├── code-generator\
-│   │   ├── SKILL.md                    # 详细文档
-│   │   ├── scripts\                    # 编译好的二进制
-│   │   ├── type-mapping.json           # 通用类型映射
-│   │   ├── template\                   # 模板组
-│   │   │   ├── Default\                # Spring Boot + MyBatis
-│   │   │   └── MybatisPlus\            # Spring Boot + MyBatis-Plus
-│   │   └── example\data-model.json     # 示例数据模型
-│   └── template-generator\
-│       ├── SKILL.md                    # 详细文档
-│       └── examples\                   # 提炼示例
+f:\gitee-project\ai-template-code-generater-skills\
+├── README.md
+├── LICENSE
+├── .gitignore
+├── share\                              # 二维码/交流群图片
+│   ├── qqqun.jpg
+│   └── weixingeren.jpg
+└── skills\
+    ├── code-generator\
+    │   ├── SKILL.md                    # 详细文档
+    │   ├── type-mapping.json           # 通用类型映射
+    │   ├── scripts\                    # 编译好的二进制
+    │   │   ├── easyframe-codegen       # Linux/Mac
+    │   │   └── easyframe-codegen.exe   # Windows
+    │   ├── example\data-model.json     # 示例数据模型
+    │   └── template\                   # 模板组
+    │       ├── Default\                # Spring Boot + MyBatis
+    │       ├── MybatisPlus\            # Spring Boot + MyBatis-Plus
+    │       ├── JeecgBoot\              # JeecgBoot 后端
+    │       ├── JeecgBootVue3\          # JeecgBoot Vue3 前端
+    │       ├── JeeSite5\               # JeeSite5 后端
+    │       └── RuoyiVue3\              # RuoYi Vue3 前端
+    └── template-generator\
+        ├── SKILL.md                    # 详细文档
+        └── examples\                   # 提炼示例
+            ├── java-spring-boot\
+            │   └── extraction-guide.md
+            └── vue\
+                └── extraction-guide.md
 ```
