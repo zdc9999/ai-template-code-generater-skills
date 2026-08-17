@@ -1,0 +1,71 @@
+{# JeeSite5 Service 直接类模板：继承 CrudService<Dao, Entity>（TestDataService 模式） #}
+$!callback.setFileName($tool.append($tableInfo.name, "Service.java"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/service"))
+
+import com.jeesite.common.entity.Page;
+import com.jeesite.common.service.CrudService;
+{% if tableInfo.savePackageName %}
+import {{ tableInfo.savePackageName }}.dao.{{ tableInfo.name }}Dao;
+import {{ tableInfo.savePackageName }}.entity.{{ tableInfo.name }};
+{% endif %}
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * {{ tableInfo.comment }} Service
+ * @author {{ author }}
+ * @version {{ currentTime }}
+ */
+@Service
+public class {{ tableInfo.name }}Service extends CrudService<{{ tableInfo.name }}Dao, {{ tableInfo.name }}> {
+	
+	/**
+	 * 获取单条数据
+	 * @param {{ tableInfo.nameLowerFirst }} 主键
+	 */
+	@Override
+	public {{ tableInfo.name }} get({{ tableInfo.name }} {{ tableInfo.nameLowerFirst }}) {
+		return super.get({{ tableInfo.nameLowerFirst }});
+	}
+	
+	/**
+	 * 查询分页数据
+	 * @param {{ tableInfo.nameLowerFirst }} 查询条件
+	 * @param {{ tableInfo.nameLowerFirst }} page 分页对象
+	 */
+	@Override
+	public Page<{{ tableInfo.name }}> findPage({{ tableInfo.name }} {{ tableInfo.nameLowerFirst }}) {
+		return super.findPage({{ tableInfo.nameLowerFirst }});
+	}
+	
+	/**
+	 * 保存数据（插入或更新）
+	 * @param {{ tableInfo.nameLowerFirst }} 数据对象
+	 */
+	@Override
+	@Transactional
+	public void save({{ tableInfo.name }} {{ tableInfo.nameLowerFirst }}) {
+		super.save({{ tableInfo.nameLowerFirst }});
+	}
+	
+	/**
+	 * 更新状态
+	 * @param {{ tableInfo.nameLowerFirst }} 数据对象
+	 */
+	@Override
+	@Transactional
+	public void updateStatus({{ tableInfo.name }} {{ tableInfo.nameLowerFirst }}) {
+		super.updateStatus({{ tableInfo.nameLowerFirst }});
+	}
+	
+	/**
+	 * 删除数据
+	 * @param {{ tableInfo.nameLowerFirst }} 数据对象
+	 */
+	@Override
+	@Transactional
+	public void delete({{ tableInfo.name }} {{ tableInfo.nameLowerFirst }}) {
+		super.delete({{ tableInfo.nameLowerFirst }});
+	}
+	
+}

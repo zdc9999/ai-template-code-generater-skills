@@ -1,0 +1,110 @@
+{# JeeSite5 Beetl 表单页面模板：标准输入表单 + 文件上传 #}
+#save("/views/modules/{{ tableInfo.modulePath }}", "Form.html")
+
+<% layout('/layouts/default.html', {title: '{{ tableInfo.comment }}管理', libs: ['validate','fileupload']}){ %>
+<div class="main-content">
+	<div class="box box-main">
+		<div class="box-header with-border">
+			<div class="box-title">
+				<i class="fa icon-note"></i> ${text({{ tableInfo.nameLowerFirst }}.isNewRecord ? '新增{{ tableInfo.comment }}' : '编辑{{ tableInfo.comment }}')}
+			</div>
+			<div class="box-tools pull-right hide">
+				<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+			</div>
+		</div>
+		<#form:form id="inputForm" model="${{{ tableInfo.nameLowerFirst }}}" action="${ctx}/{{ tableInfo.modulePath }}/{{ tableInfo.nameLowerFirst }}/save" method="post" class="form-horizontal">
+			<div class="box-body">
+				<div class="form-unit">${text('基本信息')}</div>
+{% if tableInfo.pkColumn | length > 0 %}{% set pk = tableInfo.pkColumn[0] %}{% endif %}
+				<#form:hidden path="{{ pk.name }}"/>
+{% for column in tableInfo.otherColumn %}
+{% if loop.index is odd %}
+				<div class="row">
+{% endif %}
+					<div class="col-xs-6">
+						<div class="form-group">
+							<label class="control-label col-sm-4" title="">
+								<span class="required {% if column.isNotNull %}{% else %}hide{% endif %}">*</span> ${text('{{ column.comment }}')}：<i class="fa icon-question hide"></i></label>
+							<div class="col-sm-8">
+{% if column.type == "java.util.Date" %}
+{% if column.nameLowerFirst contains 'time' %}
+								<#form:input path="{{ column.name }}" readonly="true" maxlength="20" class="form-control laydate"
+									dataFormat="datetime" data-type="datetime" data-format="yyyy-MM-dd HH:mm"/>
+{% else %}
+								<#form:input path="{{ column.name }}" readonly="true" maxlength="20" class="form-control laydate"
+									dataFormat="date" data-type="date" data-format="yyyy-MM-dd"/>
+{% endif %}
+{% elif column.maxLength and column.maxLength > 200 %}
+								<#form:textarea path="{{ column.name }}" rows="4" maxlength="{{ column.maxLength }}" class="form-control"/>
+{% else %}
+								<#form:input path="{{ column.name }}" maxlength="{{ column.maxLength or 200 }}" class="form-control"/>
+{% endif %}
+							</div>
+						</div>
+					</div>
+{% if (loop.index is even) or loop.last %}
+				</div>
+{% endif %}
+{% endfor %}
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="form-group">
+							<label class="control-label col-sm-2" title="">
+								<span class="required hide">*</span> ${text('备注信息')}：<i class="fa icon-question hide"></i></label>
+							<div class="col-sm-10">
+								<#form:textarea path="remarks" rows="4" maxlength="500" class="form-control"/>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="form-group">
+							<label class="control-label col-sm-2">${text('图片上传')}：</label>
+							<div class="col-sm-10">
+								<#form:fileupload id="uploadImage" bizKey="${{{ tableInfo.nameLowerFirst }}.id}" bizType="{{ tableInfo.nameLowerFirst }}_image"
+									uploadType="image" class="" readonly="false" preview="true"/>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="form-group">
+							<label class="control-label col-sm-2">${text('附件上传')}：</label>
+							<div class="col-sm-10">
+								<#form:fileupload id="uploadFile" bizKey="${{{ tableInfo.nameLowerFirst }}.id}" bizType="{{ tableInfo.nameLowerFirst }}_file"
+									uploadType="all" class="" readonly="false" preview="true"/>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="box-footer">
+				<div class="row">
+					<div class="col-sm-offset-2 col-sm-10">
+						<% if (hasPermi('{{ tableInfo.modulePath }}:{{ tableInfo.nameLowerFirst }}:edit')){ %>
+							<button type="submit" class="btn btn-sm btn-primary" id="btnSubmit"><i class="fa fa-check"></i> ${text('保 存')}</button>&nbsp;
+						<% } %>
+						<button type="button" class="btn btn-sm btn-default" id="btnCancel" onclick="js.closeCurrentTabPage()"><i class="fa fa-reply-all"></i> ${text('关 闭')}</button>
+					</div>
+				</div>
+			</div>
+		</#form:form>
+	</div>
+</div>
+<% } %>
+<script>
+$('#inputForm').validate({
+	submitHandler: function(form){
+		js.ajaxSubmitForm($(form), function(data){
+			js.showMessage(data.message);
+			if(data.result == Global.TRUE){
+				js.closeCurrentTabPage(function(contentWindow){
+					contentWindow.page();
+				});
+			}
+		}, "json");
+    }
+});
+</script>

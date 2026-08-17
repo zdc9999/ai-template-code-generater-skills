@@ -1,0 +1,124 @@
+{# JeeSite5 Controller 模板：继承 BaseController，完整 CRUD + 状态管理 #}
+$!callback.setFileName($tool.append($tableInfo.name, "Controller.java"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/web"))
+
+import com.jeesite.common.config.Global;
+import com.jeesite.common.entity.Page;
+import com.jeesite.common.web.BaseController;
+{% if tableInfo.savePackageName %}
+import {{ tableInfo.savePackageName }}.entity.{{ tableInfo.name }};
+import {{ tableInfo.savePackageName }}.service.{{ tableInfo.name }}Service;
+{% endif %}
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+/**
+ * {{ tableInfo.comment }} Controller
+ * @author {{ author }}
+ * @version {{ currentTime }}
+ */
+@Controller
+@RequestMapping(value = "${adminPath}/{{ tableInfo.modulePath }}/{{ tableInfo.nameLowerFirst }}")
+public class {{ tableInfo.name }}Controller extends BaseController {
+
+	private final {{ tableInfo.name }}Service {{ tableInfo.nameLowerFirst }}Service;
+
+	public {{ tableInfo.name }}Controller({{ tableInfo.name }}Service {{ tableInfo.nameLowerFirst }}Service) {
+		this.{{ tableInfo.nameLowerFirst }}Service = {{ tableInfo.nameLowerFirst }}Service;
+	}
+
+	/**
+	 * 获取数据
+	 */
+	@ModelAttribute
+	public {{ tableInfo.name }} get(String id, boolean isNewRecord) {
+		return {{ tableInfo.nameLowerFirst }}Service.get(id, isNewRecord);
+	}
+	
+	/**
+	 * 查询列表
+	 */
+	@RequiresPermissions("{{ tableInfo.modulePath }}:{{ tableInfo.nameLowerFirst }}:view")
+	@RequestMapping(value = {"list", ""})
+	public String list({{ tableInfo.name }} {{ tableInfo.nameLowerFirst }}, Model model) {
+		model.addAttribute("{{ tableInfo.nameLowerFirst }}", {{ tableInfo.nameLowerFirst }});
+		return "modules/{{ tableInfo.modulePath }}/{{ tableInfo.nameLowerFirst }}List";
+	}
+	
+	/**
+	 * 查询列表数据
+	 */
+	@RequiresPermissions("{{ tableInfo.modulePath }}:{{ tableInfo.nameLowerFirst }}:view")
+	@RequestMapping(value = "listData")
+	@ResponseBody
+	public Page<{{ tableInfo.name }}> listData({{ tableInfo.name }} {{ tableInfo.nameLowerFirst }}, HttpServletRequest request, HttpServletResponse response) {
+		{{ tableInfo.nameLowerFirst }}.setPage(new Page<>(request, response));
+		Page<{{ tableInfo.name }}> page = {{ tableInfo.nameLowerFirst }}Service.findPage({{ tableInfo.nameLowerFirst }});
+		return page;
+	}
+
+	/**
+	 * 查看编辑表单
+	 */
+	@RequiresPermissions("{{ tableInfo.modulePath }}:{{ tableInfo.nameLowerFirst }}:view")
+	@RequestMapping(value = "form")
+	public String form({{ tableInfo.name }} {{ tableInfo.nameLowerFirst }}, Model model) {
+		model.addAttribute("{{ tableInfo.nameLowerFirst }}", {{ tableInfo.nameLowerFirst }});
+		return "modules/{{ tableInfo.modulePath }}/{{ tableInfo.nameLowerFirst }}Form";
+	}
+
+	/**
+	 * 保存数据
+	 */
+	@RequiresPermissions("{{ tableInfo.modulePath }}:{{ tableInfo.nameLowerFirst }}:edit")
+	@PostMapping(value = "save")
+	@ResponseBody
+	public String save(@Validated {{ tableInfo.name }} {{ tableInfo.nameLowerFirst }}) {
+		{{ tableInfo.nameLowerFirst }}Service.save({{ tableInfo.nameLowerFirst }});
+		return renderResult(Global.TRUE, text("保存数据成功！"));
+	}
+	
+	/**
+	 * 停用数据
+	 */
+	@RequiresPermissions("{{ tableInfo.modulePath }}:{{ tableInfo.nameLowerFirst }}:edit")
+	@RequestMapping(value = "disable")
+	@ResponseBody
+	public String disable({{ tableInfo.name }} {{ tableInfo.nameLowerFirst }}) {
+		{{ tableInfo.nameLowerFirst }}.setStatus({{ tableInfo.name }}.STATUS_DISABLE);
+		{{ tableInfo.nameLowerFirst }}Service.updateStatus({{ tableInfo.nameLowerFirst }});
+		return renderResult(Global.TRUE, text("停用数据成功"));
+	}
+	
+	/**
+	 * 启用数据
+	 */
+	@RequiresPermissions("{{ tableInfo.modulePath }}:{{ tableInfo.nameLowerFirst }}:edit")
+	@RequestMapping(value = "enable")
+	@ResponseBody
+	public String enable({{ tableInfo.name }} {{ tableInfo.nameLowerFirst }}) {
+		{{ tableInfo.nameLowerFirst }}.setStatus({{ tableInfo.name }}.STATUS_NORMAL);
+		{{ tableInfo.nameLowerFirst }}Service.updateStatus({{ tableInfo.nameLowerFirst }});
+		return renderResult(Global.TRUE, text("启用数据成功"));
+	}
+	
+	/**
+	 * 删除数据
+	 */
+	@RequiresPermissions("{{ tableInfo.modulePath }}:{{ tableInfo.nameLowerFirst }}:edit")
+	@RequestMapping(value = "delete")
+	@ResponseBody
+	public String delete({{ tableInfo.name }} {{ tableInfo.nameLowerFirst }}) {
+		{{ tableInfo.nameLowerFirst }}Service.delete({{ tableInfo.nameLowerFirst }});
+		return renderResult(Global.TRUE, text("删除数据成功！"));
+	}
+	
+}

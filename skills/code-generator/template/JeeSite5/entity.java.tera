@@ -1,0 +1,112 @@
+{# JeeSite5 实体类模板：继承 DataEntity，使用 @Table/@Column 注解驱动 #}
+#save("/entity", ".java")
+#setPackageSuffix("entity")
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.jeesite.common.entity.DataEntity;
+import com.jeesite.common.mybatis.annotation.Column;
+import com.jeesite.common.mybatis.annotation.Table;
+import com.jeesite.common.mybatis.mapper.query.QueryType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+import java.io.Serial;
+{% for column in tableInfo.fullColumn %}
+{% if column.type == "java.util.Date" %}
+import java.util.Date;
+{% break %}{% endif %}{% endfor %}
+{% for column in tableInfo.fullColumn %}
+{% if column.type == "java.math.BigDecimal" %}
+import java.math.BigDecimal;
+{% break %}{% endif %}{% endfor %}
+
+/**
+ * {{ tableInfo.comment }} Entity
+ * @author {{ author }}
+ * @version {{ currentTime }}
+ */
+@Table(name = "{{ tableInfo.obj.name }}", alias = "a", label = "{{ tableInfo.comment }}", columns = {
+{% if tableInfo.pkColumn | length > 0 %}{% set pk = tableInfo.pkColumn[0] %}{% endif %}
+{% for column in tableInfo.fullColumn %}
+{% if column.isPK %}
+		@Column(name = "{{ column.obj.name }}", attrName = "{{ column.name }}", label = "{{ column.comment }}", isPK = true),
+{% elif column.type == "java.util.Date" %}
+		@Column(name = "{{ column.obj.name }}", attrName = "{{ column.name }}", label = "{{ column.comment }}", queryType = QueryType.LIKE, isUpdateForce = true),
+{% elif column.isQuery %}
+		@Column(name = "{{ column.obj.name }}", attrName = "{{ column.name }}", label = "{{ column.comment }}", queryType = QueryType.LIKE),
+{% else %}
+		@Column(name = "{{ column.obj.name }}", attrName = "{{ column.name }}", label = "{{ column.comment }}"),
+{% endif %}
+{% endfor %}
+		@Column(includeEntity = DataEntity.class),
+}, orderBy = "a.update_date DESC"
+)
+public class {{ tableInfo.name }} extends DataEntity<{{ tableInfo.name }}> {
+	
+	@Serial
+	private static final long serialVersionUID = 1L;
+{% for column in tableInfo.fullColumn %}
+{% if not column.isPK %}
+	{% if column.comment %}
+	protected {{ column.shortType }} {{ column.name }};		// {{ column.comment }}
+	{% else %}
+	protected {{ column.shortType }} {{ column.name }};
+	{% endif %}
+{% endif %}
+{% endfor %}
+	
+	public {{ tableInfo.name }}() {
+		this(null);
+	}
+
+	public {{ tableInfo.name }}(String id){
+		super(id);
+	}
+	
+{% for column in tableInfo.fullColumn %}
+{% if not column.isPK %}
+{# 生成 getter/setter 方法，带常用校验注解 #}
+{% if column.type == "java.lang.String" and column.isNotNull %}
+	@NotBlank(message="{{ column.comment }}不能为空")
+{% if column.maxLength %}
+	@Size(min=0, max={{ column.maxLength }}, message="{{ column.comment }}长度不能超过 {{ column.maxLength }} 个字符")
+{% endif %}
+{% elif column.type != "java.lang.String" and column.isNotNull %}
+	@NotNull(message="{{ column.comment }}不能为空")
+{% elif column.type == "java.lang.String" and column.maxLength %}
+	@Size(min=0, max={{ column.maxLength }}, message="{{ column.comment }}长度不能超过 {{ column.maxLength }} 个字符")
+{% endif %}
+{% if column.type == "java.util.Date" %}
+	@JsonFormat(pattern = "yyyy-MM-dd{% if column.nameLowerFirst contains 'time' or column.nameLowerFirst contains 'date' %} HH:mm{% endif %}")
+{% endif %}
+	public {{ column.shortType }} get{{ column.nameUpperFirst }}() {
+		return {{ column.name }};
+	}
+
+	public void set{{ column.nameUpperFirst }}({{ column.shortType }} {{ column.name }}) {
+		this.{{ column.name }} = {{ column.name }};
+	}
+
+{% if column.type == "java.util.Date" %}
+{# 生成日期范围查询方法 #}
+	public {{ column.shortType }} get{{ column.nameUpperFirst }}_gte() {
+		return sqlMap.getWhere().getValue("{{ column.obj.name }}", QueryType.GTE);
+	}
+
+	public void set{{ column.nameUpperFirst }}_gte({{ column.shortType }} {{ column.name }}) {
+		sqlMap.getWhere().and("{{ column.obj.name }}", QueryType.GTE, {{ column.name }});
+	}
+	
+	public {{ column.shortType }} get{{ column.nameUpperFirst }}_lte() {
+		return sqlMap.getWhere().getValue("{{ column.obj.name }}", QueryType.LTE);
+	}
+
+	public void set{{ column.nameUpperFirst }}_lte({{ column.shortType }} {{ column.name }}) {
+		sqlMap.getWhere().and("{{ column.obj.name }}", QueryType.LTE, {{ column.name }});
+	}
+
+{% endif %}
+{% endif %}
+{% endfor %}
+}

@@ -1,0 +1,41 @@
+{# JeeSite5 Mapper XML 模板：JeeSite 注解驱动模式下主要用于自定义 SQL #}
+$!callback.setFileName($tool.append($tableInfo.name, "Dao.xml"))
+$!callback.setSavePath($tool.append($projectPath, "/src/main/resources/mappings/modules", "/{{ tableInfo.modulePath }}"))
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="{% if tableInfo.savePackageName %}{{ tableInfo.savePackageName }}.{% endif %}dao.{{ tableInfo.name }}Dao">
+	
+	{# 说明：
+	   JeeSite 采用 @Table/@Column 注解驱动，标准 CRUD 不需要手写 SQL。
+	   以下为需要自定义 SQL 时的模板示例，取消注释即可使用。
+	#}
+	
+	<!-- 自定义查询示例
+	<select id="findList" resultType="{% if tableInfo.savePackageName %}{{ tableInfo.savePackageName }}.{% endif %}entity.{{ tableInfo.name }}">
+		SELECT ${sqlMap.column.toSql()}
+		FROM ${sqlMap.table.toSql()}
+		<where>
+			${sqlMap.where.toSql()}
+		</where>
+		ORDER BY ${sqlMap.order.toSql()}
+	</select> -->
+	
+	<!-- 自定义 Map 查询示例（支持分页）
+	<select id="findListForMap" resultType="map">
+		SELECT * FROM {{ tableInfo.obj.name }} a
+		<where>
+{% for column in tableInfo.fullColumn %}
+{% if not column.isPK %}
+			<if test="{{ column.name }} != null and {{ column.name }} != ''">
+				AND a.{{ column.obj.name }} = #{{ column.name }}
+			</if>
+{% endif %}
+{% endfor %}
+		</where>
+		<if test="page != null and page.orderBy != null and page.orderBy != ''">
+			ORDER BY ${page.orderBy}
+		</if>
+	</select> -->
+	
+</mapper>

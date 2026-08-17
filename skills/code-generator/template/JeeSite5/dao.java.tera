@@ -1,0 +1,17 @@
+{# JeeSite5 DAO 接口模板：继承 CrudDao，@MyBatisDao 注解 #}
+$!callback.setFileName($tool.append($tableInfo.name, "Dao.java"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/dao"))
+
+import com.jeesite.common.dao.CrudDao;
+import com.jeesite.common.mybatis.annotation.MyBatisDao;
+{% if tableInfo.savePackageName %}import {{ tableInfo.savePackageName }}.entity.{{ tableInfo.name }};{% endif %}
+
+/**
+ * {{ tableInfo.comment }} DAO 接口
+ * @author {{ author }}
+ * @version {{ currentTime }}
+ */
+@MyBatisDao
+public interface {{ tableInfo.name }}Dao extends CrudDao<{{ tableInfo.name }}> {
+	
+}
